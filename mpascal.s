@@ -1,6 +1,6 @@
 	.data
-string: .asciiz	"input two numbers to compute nCr.\nn: "
-string2:.asciiz "r: "
+string: .asciiz	"input depth of triangle: "
+space:	.asciiz " "
 nline:	.asciiz "\n"
 
 	.text
@@ -13,27 +13,10 @@ main:
 	syscall
 	move	$t0, $v0
 
-	li	$v0, 4
-	la	$a0, string2
-	syscall
-
-	li	$v0, 5	
-	syscall
-	move	$t1, $v0
-
 	move	$a0, $t0
-	move	$a1, $t1
-	jal	comb
+	jal	ptriangle
 
-exit:		
-	move	$a0, $v0
-	li	$v0, 1
-	syscall
-
-	li	$v0, 4
-	la	$a0, nline
-	syscall
-
+exit:
 	li	$v0, 10
 	syscall
 
@@ -86,5 +69,55 @@ comb:
 	mflo	$v0
 
 	lw	$ra, 0($sp)
+	addi	$sp, $sp, 4
 	jr	$ra
 
+# pascal's triangle line
+# void pline(int a)
+pline:
+	addi	$sp, $sp, -4
+	sw	$ra, 0($sp)
+
+	move	$t7, $a0
+	li	$a1, 0
+for:
+	jal	comb
+	
+	move	$a0, $v0
+	li	$v0, 1
+	syscall
+
+	la	$a0, space
+	li	$v0, 4
+	syscall
+
+	move	$a0, $t7
+	addi	$a1, $a1, 1
+	ble	$a1, $a0, for
+
+	lw	$ra, 0($sp)
+	addi	$sp, $sp, 4
+	jr	$ra
+
+# triangle
+# void ptriangle(int a)
+ptriangle:
+	addi	$sp, $sp, -4
+	sw	$ra, 0($sp)
+	move 	$s0, $a0
+	li	$s1, 0
+
+l:
+	move	$a0, $s1
+	jal	pline
+	
+	li	$v0, 4
+	la	$a0, nline
+	syscall
+	
+	addi	$s1, $s1, 1
+	blt	$s1, $s0, l
+ex:
+	lw	$ra, 0($sp)
+	addi	$sp, $sp, 4
+	jr	$ra
